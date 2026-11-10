@@ -9,6 +9,7 @@ public class Interactor : MonoBehaviour
     void Update()
     {
         Current = null;
+        if (PlayerController.inputLocked) return;
         if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, range))
             Current = hit.collider.GetComponentInParent<IInteractable>();
 

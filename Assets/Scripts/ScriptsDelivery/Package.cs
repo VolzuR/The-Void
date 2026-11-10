@@ -10,6 +10,12 @@ public class Package : MonoBehaviour, IInteractable
     public void Interact(PlayerInventory player)
     {
         player.AddPackage(this);
-        gameObject.SetActive(false); // убираем из мира, но объект сохраняется в инвентаре
+    }
+
+    // убираем посылку из мира в инвентарь (объект сохраняется, но выключен)
+    public void Stow(Transform parent)
+    {
+        transform.SetParent(parent, false);
+        gameObject.SetActive(false);
     }
 }

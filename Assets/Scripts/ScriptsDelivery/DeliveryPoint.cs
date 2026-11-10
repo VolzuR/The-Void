@@ -3,20 +3,28 @@ using UnityEngine;
 public class DeliveryPoint : MonoBehaviour, IInteractable
 {
     public string destinationId = "House_A";
-
     public string Prompt => "[E] Отдать посылку";
 
     public void Interact(PlayerInventory player)
     {
-        Package p = player.FindFor(destinationId);
-        if (p == null)
+        Package held = player.Held;
+
+        if (held == null)
         {
-            Debug.Log("У тебя нет посылки для " + destinationId);
+            player.Say("У тебя нет посылки. Открой инвентарь (I)");
             return;
         }
 
-        player.Remove(p);
-        MoneyManager.Instance.Add(p.reward);
-        Destroy(p.gameObject);
+        if (held.destinationId != destinationId)
+        {
+            player.Say("Эта посылка не для этого дома. Выбери другую (I)");
+            return;
+        }
+
+        int reward = held.reward;
+        player.Remove(held);
+        Destroy(held.gameObject);
+        MoneyManager.Instance.Add(reward);
+        player.Say("Доставлено! +" + reward);
     }
 }

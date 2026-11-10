@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     public AudioSource breathingSource;
     public float fadeDuration = 3f;
     float startVolume = 1f;
+    public static bool inputLocked;
 
     CharacterController cc;
     float pitch;
@@ -41,6 +42,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        inputLocked = false;
         cc = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
 
@@ -56,6 +58,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (inputLocked) return;
         Look();
         HandleCrouch();
         Move();
