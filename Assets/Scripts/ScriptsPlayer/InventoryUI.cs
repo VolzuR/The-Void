@@ -5,6 +5,12 @@ public class InventoryUI : MonoBehaviour
     public PlayerInventory inventory;
     public KeyCode openKey = KeyCode.I;
     public float rotateSpeed = 40f;      // градусов в секунду
+    [Header("Arrows")]
+    public Texture2D leftArrowTexture;
+    public Texture2D rightArrowTexture;
+    public float arrowSize = 90f;
+    public Color arrowColor = Color.white;
+    public Color arrowHoverColor = new Color(0.95f, 0.8f, 0.2f, 1f);
     public bool showHeldHint = true;     // подсказка "в руках" в углу
 
     bool open;
@@ -107,11 +113,8 @@ public class InventoryUI : MonoBehaviour
 
         pivot.localRotation = Quaternion.identity;
 
-        // копия модели без логики, только внешний вид
-        previewObj = Instantiate(p.gameObject, pivot);
+        previewObj = p.CreateVisualCopy(pivot);
         previewObj.SetActive(true);
-        foreach (Package pk in previewObj.GetComponentsInChildren<Package>(true)) Destroy(pk);
-        foreach (Collider c in previewObj.GetComponentsInChildren<Collider>(true)) Destroy(c);
 
         Transform t = previewObj.transform;
         t.localPosition = Vector3.zero;
@@ -147,11 +150,19 @@ public class InventoryUI : MonoBehaviour
         big.fontSize = 28;
         big.fontStyle = FontStyle.Bold;
 
-        arrow = new GUIStyle(GUI.skin.button);
-        arrow.fontSize = 48;
+        arrow = new GUIStyle(label);
+        arrow.fontSize = 64;
         arrow.fontStyle = FontStyle.Bold;
     }
-
+    bool DrawArrow(Rect r, Texture2D tex, string fallback)
+    {
+        bool hover = r.Contains(Event.current.mousePosition);
+        GUI.color = hover ? arrowHoverColor : arrowColor;
+        if (tex) GUI.DrawTexture(r, tex, ScaleMode.ScaleToFit, true);
+        else GUI.Label(r, fallback, arrow);
+        GUI.color = Color.white;
+        return GUI.Button(r, GUIContent.none, GUIStyle.none);
+    }
     void OnGUI()
     {
         if (!inventory) return;
@@ -193,10 +204,13 @@ public class InventoryUI : MonoBehaviour
             GUI.DrawTexture(new Rect(cx - s / 2, cy - s / 2 - 20, s, s), rt, ScaleMode.ScaleToFit, false);
 
             // стрелки на экране
-            float a = 90f;
+            float a = arrowSize;
+            Rect leftR = new Rect(cx - s / 2 - a - 40, cy - a / 2 - 20, a, a);
+            Rect rightR = new Rect(cx + s / 2 + 40, cy - a / 2 - 20, a, a);
+            if (DrawArrow(leftR, leftArrowTexture, "<")) inventory.Select(-1);
+            if (DrawArrow(rightR, rightArrowTexture, ">")) inventory.Select(1);
             if (GUI.Button(new Rect(cx - s / 2 - a - 40, cy - a / 2 - 20, a, a), "<", arrow)) inventory.Select(-1);
             if (GUI.Button(new Rect(cx + s / 2 + 40, cy - a / 2 - 20, a, a), ">", arrow)) inventory.Select(1);
-
             GUI.Label(new Rect(cx - 250, cy + s / 2 - 5, 500, 30), "Посылка → " + held.destinationId, big);
             GUI.Label(new Rect(cx - 250, cy + s / 2 + 30, 500, 30),
                 "Награда: " + held.reward + "     (" + (inventory.selectedIndex + 1) + " / " + n + ")", label);
