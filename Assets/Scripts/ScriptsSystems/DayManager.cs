@@ -56,7 +56,7 @@ public class DayManager : MonoBehaviour
         if (!sun) sun = RenderSettings.sun;
         if (!sun)
         {
-            foreach (Light l in FindObjectsByType<Light>(FindObjectsSortMode.None))
+            foreach (Light l in FindObjectsByType<Light>())
                 if (l.type == LightType.Directional) { sun = l; break; }
         }
 
@@ -89,10 +89,10 @@ public class DayManager : MonoBehaviour
         yield return Fade(1f);
 
         // убираем недоставленные посылки (и в мире, и в инвентаре)
-        Package[] all = FindObjectsByType<Package>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        Package[] all = FindObjectsByType<Package>(FindObjectsInactive.Include);
         int missed = all.Length;
         foreach (Package p in all) if (p) Destroy(p.gameObject);
-        if (inventory) inventory.ClearAll();
+        if (inventory) inventory.ClearPackages();
         if (missed > 0 && penaltyPerMissedPackage > 0 && MoneyManager.Instance != null)
             MoneyManager.Instance.Add(-missed * penaltyPerMissedPackage);
 

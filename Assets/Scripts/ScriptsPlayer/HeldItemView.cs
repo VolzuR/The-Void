@@ -4,10 +4,10 @@ public class HeldItemView : MonoBehaviour
 {
     public PlayerInventory inventory;
     public Transform handPoint;
-    public float scale = 0.6f;       // размер предмета в руке
+    public float scale = 0.6f;
 
     GameObject visual;
-    Package shown;
+    Item shown;
 
     void Awake()
     {
@@ -19,14 +19,13 @@ public class HeldItemView : MonoBehaviour
 
     void Update()
     {
-        // пока открыт инвентарь, предмет в руке прячем
         if (visual) visual.SetActive(!PlayerController.inputLocked);
     }
 
     void Rebuild()
     {
-        Package held = inventory.Held;
-        if (held == shown) return;
+        Item held = inventory.Held;
+        if (held != null && held == shown && visual) return;
 
         if (visual) Destroy(visual);
         visual = null;
@@ -35,7 +34,6 @@ public class HeldItemView : MonoBehaviour
 
         visual = held.CreateVisualCopy(handPoint);
         visual.SetActive(true);
-
         visual.transform.localPosition = Vector3.zero;
         visual.transform.localRotation = Quaternion.identity;
         visual.transform.localScale = held.transform.lossyScale * scale;

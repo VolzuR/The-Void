@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PackageSpawner : MonoBehaviour
 {
+    public Vector2 weightRange = new Vector2(1f, 5f);
     [Header("Что и где")]
     public Package[] prefabs;            // префабы коробок и пакетов
     public Transform[] spawnPoints;      // где "привозят" (если пусто, спавн вокруг этого объекта)
@@ -24,7 +25,7 @@ public class PackageSpawner : MonoBehaviour
 
     void OnNewDay(int day)
     {
-        DeliveryPoint[] houses = FindObjectsByType<DeliveryPoint>(FindObjectsSortMode.None);
+        DeliveryPoint[] houses = FindObjectsByType<DeliveryPoint>();
         if (houses.Length == 0 || prefabs == null || prefabs.Length == 0)
         {
             Debug.LogWarning("PackageSpawner: нет домов (DeliveryPoint) или не назначены префабы");
@@ -48,6 +49,7 @@ public class PackageSpawner : MonoBehaviour
             Package p = Instantiate(prefab, pos, Quaternion.Euler(0, Random.Range(0f, 360f), 0));
 
             p.destinationId = house.destinationId;
+            p.SetWeight(Mathf.Round(Random.Range(weightRange.x, weightRange.y) * 2f) / 2f);
             float dist = Vector3.Distance(sp.position, house.transform.position);
             p.reward = Mathf.Max(5, Mathf.RoundToInt((baseReward + dist * rewardPerMeter) / 5f) * 5);
         }

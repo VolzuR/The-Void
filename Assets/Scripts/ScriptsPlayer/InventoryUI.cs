@@ -4,24 +4,24 @@ public class InventoryUI : MonoBehaviour
 {
     public PlayerInventory inventory;
     public KeyCode openKey = KeyCode.I;
-    public float rotateSpeed = 40f;      // градусов в секунду
+    public float rotateSpeed = 40f;
+    public bool showHeldHint = true;
+
     [Header("Arrows")]
     public Texture2D leftArrowTexture;
     public Texture2D rightArrowTexture;
     public float arrowSize = 90f;
     public Color arrowColor = Color.white;
     public Color arrowHoverColor = new Color(0.95f, 0.8f, 0.2f, 1f);
-    public bool showHeldHint = true;     // подсказка "в руках" в углу
 
     bool open;
-    GUIStyle label, big, arrow;
+    GUIStyle label, big, arrow, desc;
 
-    // 3D-превью
     Transform stage, pivot;
     Camera previewCam;
     RenderTexture rt;
     GameObject previewObj;
-    Package shownPackage;
+    Item shownItem;
 
     void Awake()
     {
@@ -31,7 +31,6 @@ public class InventoryUI : MonoBehaviour
 
     void SetupPreview()
     {
-        // сцена для превью строится далеко от игрового мира
         GameObject root = new GameObject("InventoryPreviewStage");
         root.transform.position = new Vector3(0, -500, 0);
         stage = root.transform;
@@ -67,7 +66,7 @@ public class InventoryUI : MonoBehaviour
     {
         if (!open)
         {
-            if (Input.GetKeyDown(openKey)) Open();
+            if (Input.GetKeyDown(openKey) && !PlayerController.inputLocked) Open();
             return;
         }
 
@@ -75,7 +74,7 @@ public class InventoryUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightArrow)) inventory.Select(1);
         if (Input.GetKeyDown(KeyCode.LeftArrow)) inventory.Select(-1);
 
-        if (inventory.Held != shownPackage) ShowItem(inventory.Held);
+        if (inventory.Held != shownItem) ShowItem(inventory.Held);
 
         if (pivot) pivot.Rotate(0, rotateSpeed * Time.unscaledDeltaTime, 0, Space.World);
     }
@@ -104,11 +103,11 @@ public class InventoryUI : MonoBehaviour
         ShowItem(null);
     }
 
-    void ShowItem(Package p)
+    void ShowItem(Item p)
     {
         if (previewObj) Destroy(previewObj);
         previewObj = null;
-        shownPackage = p;
+        shownItem = p;
         if (p == null) return;
 
         pivot.localRotation = Quaternion.identity;
@@ -124,13 +123,11 @@ public class InventoryUI : MonoBehaviour
         Renderer[] rs = previewObj.GetComponentsInChildren<Renderer>();
         if (rs.Length == 0) return;
 
-        // подгоняем размер под экран превью
         Bounds b = rs[0].bounds;
         for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
         float size = Mathf.Max(b.size.x, b.size.y, b.size.z);
         if (size > 0.0001f) t.localScale *= 1.2f / size;
 
-        // центрируем, чтобы вращалось вокруг середины
         b = rs[0].bounds;
         for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
         t.position += pivot.position - b.center;
@@ -153,7 +150,13 @@ public class InventoryUI : MonoBehaviour
         arrow = new GUIStyle(label);
         arrow.fontSize = 64;
         arrow.fontStyle = FontStyle.Bold;
+
+        desc = new GUIStyle(label);
+        desc.fontSize = 16;
+        desc.alignment = TextAnchor.UpperCenter;
+        desc.normal.textColor = new Color(0.8f, 0.8f, 0.8f);
     }
+
     bool DrawArrow(Rect r, Texture2D tex, string fallback)
     {
         bool hover = r.Contains(Event.current.mousePosition);
@@ -163,25 +166,24 @@ public class InventoryUI : MonoBehaviour
         GUI.color = Color.white;
         return GUI.Button(r, GUIContent.none, GUIStyle.none);
     }
+
     void OnGUI()
     {
         if (!inventory) return;
         EnsureStyles();
         GUI.depth = -100;
 
-        // короткие сообщения
         if (Time.time < inventory.MessageUntil && !open)
             GUI.Label(new Rect(Screen.width / 2 - 300, Screen.height / 2 + 50, 600, 30), inventory.Message, label);
 
         if (!open)
         {
             if (showHeldHint && inventory.Held != null)
-                GUI.Label(new Rect(10, Screen.height - 40, 500, 30),
-                    "В руках: посылка → " + inventory.Held.destinationId + "   [I] инвентарь", label);
+                GUI.Label(new Rect(10, Screen.height - 40, 700, 30),
+                    "В руках: " + inventory.Held.Title + "   [I] инвентарь   [G] выбросить", label);
             return;
         }
 
-        // тёмный фон
         GUI.color = new Color(0, 0, 0, 0.9f);
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = Color.white;
@@ -189,10 +191,12 @@ public class InventoryUI : MonoBehaviour
         float cx = Screen.width / 2f;
         float cy = Screen.height / 2f;
 
-        GUI.Label(new Rect(cx - 200, 30, 400, 40), "ИНВЕНТАРЬ", big);
+        GUI.Label(new Rect(cx - 200, 25, 400, 40), "ИНВЕНТАРЬ", big);
+        GUI.Label(new Rect(cx - 200, 65, 400, 30),
+            "Рюкзак: " + inventory.TotalWeight.ToString("0.#") + " / " + inventory.maxWeight.ToString("0.#") + " кг", label);
 
-        int n = inventory.packages.Count;
-        Package held = inventory.Held;
+        int n = inventory.items.Count;
+        Item held = inventory.Held;
 
         if (held == null)
         {
@@ -200,20 +204,22 @@ public class InventoryUI : MonoBehaviour
         }
         else
         {
-            float s = Mathf.Min(Screen.height * 0.5f, 420f);
-            GUI.DrawTexture(new Rect(cx - s / 2, cy - s / 2 - 20, s, s), rt, ScaleMode.ScaleToFit, false);
+            float s = Mathf.Min(Screen.height * 0.45f, 400f);
+            float iy = cy - 40f;
 
-            // стрелки на экране
+            GUI.DrawTexture(new Rect(cx - s / 2, iy - s / 2, s, s), rt, ScaleMode.ScaleToFit, false);
+
             float a = arrowSize;
-            Rect leftR = new Rect(cx - s / 2 - a - 40, cy - a / 2 - 20, a, a);
-            Rect rightR = new Rect(cx + s / 2 + 40, cy - a / 2 - 20, a, a);
+            Rect leftR = new Rect(cx - s / 2 - a - 40, iy - a / 2, a, a);
+            Rect rightR = new Rect(cx + s / 2 + 40, iy - a / 2, a, a);
             if (DrawArrow(leftR, leftArrowTexture, "<")) inventory.Select(-1);
             if (DrawArrow(rightR, rightArrowTexture, ">")) inventory.Select(1);
-            if (GUI.Button(new Rect(cx - s / 2 - a - 40, cy - a / 2 - 20, a, a), "<", arrow)) inventory.Select(-1);
-            if (GUI.Button(new Rect(cx + s / 2 + 40, cy - a / 2 - 20, a, a), ">", arrow)) inventory.Select(1);
-            GUI.Label(new Rect(cx - 250, cy + s / 2 - 5, 500, 30), "Посылка → " + held.destinationId, big);
-            GUI.Label(new Rect(cx - 250, cy + s / 2 + 30, 500, 30),
-                "Награда: " + held.reward + "     (" + (inventory.selectedIndex + 1) + " / " + n + ")", label);
+
+            float ty = iy + s / 2;
+            GUI.Label(new Rect(cx - 300, ty - 5, 600, 36), held.Title, big);
+            GUI.Label(new Rect(cx - 300, ty + 32, 600, 70), held.Details, desc);
+            GUI.Label(new Rect(cx - 300, ty + 105, 600, 30),
+                "Вес: " + held.weight.ToString("0.##") + " кг     (" + (inventory.selectedIndex + 1) + " / " + n + ")", label);
         }
 
         GUI.Label(new Rect(cx - 300, Screen.height - 50, 600, 30), "← →  выбрать      I / Esc  закрыть", label);

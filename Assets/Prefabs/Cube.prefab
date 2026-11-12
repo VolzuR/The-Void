@@ -125,6 +125,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74e895aff97d5b44eb6ef8a4a42cbff0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Package
+  itemName: "\u041F\u0440\u0435\u0434\u043C\u0435\u0442"
+  description: 
+  weight: 2
   destinationId: House_A
   reward: 50
-  mass: 2

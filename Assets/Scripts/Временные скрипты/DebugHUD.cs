@@ -21,7 +21,7 @@ public class DebugHUD : MonoBehaviour
         if (MoneyManager.Instance != null)
             GUI.Label(new Rect(10, 10, 400, 25), "Деньги: " + MoneyManager.Instance.money);
 
-        GUI.Label(new Rect(10, 30, 400, 25), "Посылок с собой: " + inventory.packages.Count);
+        GUI.Label(new Rect(10, 30, 400, 25), "Посылок с собой: " + inventory.items.Count);
 
         if (interactor != null && interactor.Current != null)
             GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 + 20, 400, 25), interactor.Current.Prompt);
