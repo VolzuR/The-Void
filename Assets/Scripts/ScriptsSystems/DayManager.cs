@@ -33,6 +33,7 @@ public class DayManager : MonoBehaviour
     public float fadeTime = 1f;
 
     bool sleeping;
+    public bool IsSleeping => sleeping;
     float fade;
     string caption = "", subtitle = "";
     Material skyInstance;

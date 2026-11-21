@@ -400,6 +400,7 @@ GameObject:
   - component: {fileID: 450440988}
   - component: {fileID: 450440989}
   - component: {fileID: 450440990}
+  - component: {fileID: 450440991}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -587,6 +588,57 @@ MonoBehaviour:
   color: {r: 1, g: 0.95, b: 0.8, a: 1}
   clickSource: {fileID: 0}
   clickClip: {fileID: 0}
+--- !u!114 &450440991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 450440981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4f732b2379a583489ded36f08bc90ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PhoneUI
+  inventory: {fileID: 0}
+  player: {fileID: 0}
+  openKey: 9
+  pauseGameWhileOpen: 0
+  sortingOrder: 1000
+  font: {fileID: 0}
+  wallpaper: {fileID: 0}
+  phoneFrame: {fileID: 0}
+  frameColor: {r: 0.05, g: 0.05, b: 0.06, a: 1}
+  screenColor: {r: 0.1, g: 0.12, b: 0.18, a: 1}
+  phoneSize: {x: 400, y: 780}
+  landscapeSize: {x: 1000, y: 640}
+  rotateSpeed: 2400
+  bezel: 14
+  companyName: "\u041F\u043E\u0447\u0442\u043E\u0432\u0430\u044F \u0441\u043B\u0443\u0436\u0431\u0430"
+  apps:
+  - appName: "\u0420\u0430\u0431\u043E\u0442\u0430"
+    type: 0
+    icon: {fileID: 0}
+    color: {r: 0.2, g: 0.6, b: 0.35, a: 1}
+    screenPrefab: {fileID: 0}
+    landscape: 0
+  - appName: "\u041A\u0430\u043B\u044C\u043A\u0443\u043B\u044F\u0442\u043E\u0440"
+    type: 1
+    icon: {fileID: 0}
+    color: {r: 0.9, g: 0.5, b: 0.15, a: 1}
+    screenPrefab: {fileID: 0}
+    landscape: 0
+  - appName: "\u041A\u0430\u0440\u0442\u0430"
+    type: 2
+    icon: {fileID: 0}
+    color: {r: 0.25, g: 0.5, b: 0.9, a: 1}
+    screenPrefab: {fileID: 0}
+    landscape: 0
+  mapImage: {fileID: 0}
+  autoMapBounds: 1
+  mapCenter: {x: 0, y: 0}
+  mapSize: 200
+  mapShowLabels: 1
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1178,7 +1230,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: bfbb39c65bf3e6446a3f8845768bd563, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
